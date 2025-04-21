@@ -462,15 +462,15 @@ document.addEventListener('DOMContentLoaded', function() {
             <div id="platform-arch-selector" style="display: none; margin-top: 15px;">
                 <strong>选择架构:</strong>
                 <div id="mac-arch-options" style="display: none;">
-                    <label><input type="radio" name="Mac_Arm" value="Mac_Arm" checked> Mac ARM</label>
-                    <label style="margin-left: 10px;"><input type="radio" name="arch" value="Mac"> Mac Intel</label>
+                    <label><input type="radio" name="Mac" value="Mac_Arm" checked> Mac ARM</label>
+                    <label style="margin-left: 10px;"><input type="radio" name="Mac" value="Mac"> Mac Intel</label>
                 </div>
                 <div id="linux-arch-options" style="display: none;">
-                    <label><input type="radio" name="Linux_x64" value="Linux_x64" checked> Linux x64</label>
-                    <label style="margin-left: 10px;"><input type="radio" name="arch" value="Linux"> Linux</label>
+                    <label><input type="radio" name="Linux" value="Linux_x64" checked> Linux x64</label>
+                    <label style="margin-left: 10px;"><input type="radio" name="Linux" value="Linux"> Linux</label>
                 </div>
                 <div id="windows-arch-options" style="display: none;">
-                    <label><input type="radio" name="Win_x64" value="Win_x64" checked> Windows x64</label>
+                    <label><input type="radio" name="Win" value="Win_x64" checked> Windows x64</label>
                     <label style="margin-left: 10px;"><input type="radio" name="Win" value="Win"> Windows</label>
                 </div>
                 <button id="start-check-btn" class="ant-btn ant-btn-primary" style="margin-top: 10px;">开始检查</button>
