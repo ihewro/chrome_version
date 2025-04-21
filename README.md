@@ -1,6 +1,6 @@
 # chromium 历史版本搜索下载
 
-chromium 虽然有 https://chromiumdash.appspot.com/，  但是官网并没有提供对外每个版本的下载链接，可能考虑到安全因素原因。此外，chromium 在 https://commondatastorage.googleapis.com/chromium-browser-snapshots 提供基于 chromium Position 的下载地址
+chromium 虽然有 https://chromiumdash.appspot.com/ ，但是官网并没有提供对外每个版本的下载链接，可能考虑到安全因素原因。此外，chromium 在 https://commondatastorage.googleapis.com/chromium-browser-snapshots 提供基于 chromium Position 的下载地址。
 
 也有一些第三方网站提供了历史版本下载：
 - https://vikyd.github.io/download-chromium-history-version/#/ 最后停在了m121版本
