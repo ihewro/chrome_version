@@ -1,0 +1,395 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0; /* Remove default body margin */
+    background-color: #f4f5f7;
+    color: #172b4d;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Ensure footer stays at bottom */
+}
+
+header {
+    background-color: #0052cc;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+main {
+    flex-grow: 1; /* Allow main content to take available space */
+    padding: 20px;
+    max-width: 1100px; /* Slightly wider */
+    margin: 20px auto; /* Center main content */
+    width: 95%; /* Responsive width */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #ffffff; /* White text for header */
+    text-align: center;
+    margin: 0; /* Remove default h1 margin */
+    font-size: 24px;
+}
+
+.search-section {
+    margin-bottom: 30px; /* Space below search */
+}
+
+.search-container { /* Updated selector */
+    display: flex;
+    gap: 20px; /* Increased gap */
+    align-items: flex-end; /* Align items to bottom */
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    padding: 20px;
+    background-color: #fafbfc;
+    border-radius: 6px;
+    border: 1px solid #dfe1e6;
+}
+
+.search-item { /* Style for each search input group */
+    display: flex;
+    flex-direction: column;
+}
+
+.search-item label {
+    margin-bottom: 5px; /* Space between label and input */
+    font-weight: bold;
+    font-size: 14px;
+    color: #42526e;
+}
+
+.search-controls { /* Keep for potential future use, but primary is .search-container */
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.search-container input[type="text"],
+.search-container select { /* Updated selector */
+    padding: 8px 12px;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.ant-btn {
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.ant-btn-primary {
+    background-color: #0052cc;
+    color: white;
+    border: 1px solid #0052cc;
+}
+
+.ant-btn-primary:hover {
+    background-color: #0065ff;
+    border-color: #0065ff;
+}
+
+.ant-btn-default {
+    background-color: #ffffff;
+    color: #42526e;
+    border: 1px solid #dfe1e6;
+}
+
+.ant-btn-default:hover {
+    background-color: #f4f5f7;
+    border-color: #c1c7d0;
+}
+
+.ant-btn-success {
+    background-color: #36b37e;
+    color: white;
+    border: 1px solid #36b37e;
+}
+
+.ant-btn-success:hover {
+    background-color: #00875a;
+    border-color: #00875a;
+}
+
+.ant-btn-danger {
+    background-color: #de350b;
+    color: white;
+    border: 1px solid #de350b;
+}
+
+.ant-btn-danger:hover {
+    background-color: #bf2600;
+    border-color: #bf2600;
+}
+
+.ant-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.results-table th,
+.results-table td {
+    border: 1px solid #dfe1e6;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.results-table th {
+    background-color: #f4f5f7;
+    font-weight: bold;
+}
+
+.results-table tbody tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+.results-table tbody tr:hover {
+    background-color: #ebecf0;
+}
+
+.pagination-controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination-controls span {
+    font-size: 14px;
+    color: #5e6c84;
+}
+
+/* Styles for Ant Design spinner (already present in index.html) */
+.loading-spinner {
+    display: flex; /* Use flex for consistency */
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px; /* More padding */
+}
+
+/* Hide the custom spinner if Ant spinner is used */
+#loading-spinner .spinner {
+    display: none;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #0052cc;
+    animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Modal Styles */
+.detail-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(9, 30, 66, 0.54); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #ffffff;
+    margin: 10% auto; /* 10% from the top and centered */
+    padding: 25px;
+    border: 1px solid #dfe1e6;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dfe1e6;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #0052cc;
+    font-size: 18px;
+}
+
+.close-modal {
+    color: #5e6c84;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: #172b4d;
+    text-decoration: none;
+}
+
+.modal-body {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.modal-body p {
+    margin-bottom: 10px;
+}
+
+.modal-body strong {
+    color: #172b4d;
+}
+
+#platform-arch-selector label {
+    margin-right: 15px;
+    display: inline-block; /* Better alignment */
+}
+
+#platform-arch-selector input[type="radio"] {
+    margin-right: 5px;
+}
+
+#download-check-results {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #dfe1e6;
+}
+
+#check-status {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#check-results-list {
+    list-style: none;
+    padding: 0;
+    max-height: 150px; /* Limit height */
+    overflow-y: auto; /* Add scrollbar if needed */
+    margin-bottom: 15px;
+    border: 1px solid #ebecf0;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+#check-results-list li {
+    padding: 5px 0;
+    font-size: 13px;
+    color: #42526e;
+}
+
+#check-results-list li.success {
+    color: #00875a;
+}
+
+#check-results-list li.failure {
+    color: #de350b;
+}
+
+.download-info {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.download-info.success {
+    background-color: #e3fcef;
+    border: 1px solid #abf5d1;
+    color: #006644;
+}
+
+.download-info.error {
+    background-color: #ffebe6;
+    border: 1px solid #ffbdad;
+    color: #bf2600;
+}
+
+.check-summary {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #5e6c84;
+    font-style: italic;
+}
+
+.modal-download-link {
+    margin-top: 15px;
+    display: inline-block; /* Ensure button styles apply */
+}
+
+#loading-animation {
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    margin-top: 30px; /* Space above footer */
+    background-color: #f4f5f7;
+    color: #5e6c84;
+    border-top: 1px solid #dfe1e6;
+    font-size: 13px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) { /* Adjust breakpoint */
+    .search-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px; /* Adjust gap for column layout */
+    }
+
+    .search-item {
+        width: 100%; /* Make items full width */
+    }
+
+    .search-container button#search-btn {
+        width: 100%; /* Make button full width */
+        margin-top: 10px; /* Add space above button */
+    }
+
+    .pagination-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .modal-content {
+        width: 90%;
+        margin: 15% auto;
+    }
+}

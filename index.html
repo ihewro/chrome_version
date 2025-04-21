@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromium 历史版本搜索与下载</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入 Ant Design 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5.12.2/dist/reset.css">
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- 引入 Ant Design -->
+    <script src="https://cdn.jsdelivr.net/npm/antd@5.12.2/dist/antd.min.js"></script>
+    <!-- 引入 Ant Design 图标 -->
+    <script src="https://cdn.jsdelivr.net/npm/@ant-design/icons@5.2.6/dist/index.umd.js"></script>
+</head>
+<body>
+    <header>
+        <h1 style="margin-bottom: 0;">Chromium 历史版本搜索与下载</h1>
+    </header>
+    
+    <main>
+        <section class="search-section">
+            <div class="search-container ant-form">
+                <div class="search-item">
+                    <label for="version" class="ant-form-item-label">版本:</label>
+                    <input type="text" id="version" placeholder="输入版本号，如 135.0.12" class="ant-input">
+                </div>
+                
+                <div class="search-item">
+                    <label for="channel" class="ant-form-item-label">类别:</label>
+                    <select id="channel" class="ant-select">
+                        <option value="Stable" selected>Stable</option>
+                        <option value="Beta">Beta</option>
+                        <option value="Dev">Dev</option>
+                        <option value="Canary">Canary</option>
+                    </select>
+                </div>
+                
+                <div class="search-item">
+                    <label for="platform" class="ant-form-item-label">平台:</label>
+                    <select id="platform" class="ant-select">
+                        <option value="Mac" selected>Mac</option>
+                        <option value="Windows">Windows</option>
+                        <option value="Linux">Linux</option>
+                    </select>
+                </div>
+                
+                <button id="search-btn" class="ant-btn ant-btn-primary">搜索</button>
+            </div>
+        </section>
+        
+        <section class="results-section" id="results-section">
+            <div class="results-header">
+                <h2>搜索结果</h2>
+                <div class="results-info">
+                    <span id="total-count">总计: 0 个结果</span>
+                </div>
+            </div>
+            
+            <!-- 加载动画 -->
+            <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                <div class="ant-spin-container">
+                    <div class="ant-spin ant-spin-spinning">
+                        <span class="ant-spin-dot ant-spin-dot-spin">
+                            <i class="ant-spin-dot-item"></i>
+                            <i class="ant-spin-dot-item"></i>
+                            <i class="ant-spin-dot-item"></i>
+                            <i class="ant-spin-dot-item"></i>
+                        </span>
+                    </div>
+                    <div class="ant-spin-text">加载中...</div>
+                </div>
+            </div>
+            
+            <div class="results-table" id="results-table" style="display: none;">
+                <table class="ant-table">
+                    <thead class="ant-table-thead">
+                        <tr>
+                            <th>版本</th>
+                            <th>版本时间</th>
+                            <th>下载地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body" class="ant-table-tbody">
+                        <!-- 结果将通过JavaScript动态添加 -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination ant-pagination" style="margin-top: 20px;display: none;" id="results-pagination">
+                <button id="prev-page" class="ant-btn ant-btn-default" disabled>上一页</button>
+                <span id="page-info" class="ant-pagination-item">第 <span id="current-page">1</span> 页，共 <span id="total-pages">1</span> 页</span>
+                <button id="next-page" class="ant-btn ant-btn-default" disabled>下一页</button>
+            </div>
+            
+            <!-- 详细信息模态框 -->
+            <div id="detail-modal" class="detail-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>版本详细信息</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+                    <div class="modal-body" id="detail-content">
+                        <!-- 详细信息将通过JavaScript动态添加 -->
+                        <!-- <div id="platform-arch-selector" style="margin-top: 15px; display: none;">
+                            <label class="ant-form-item-label">选择架构:</label>
+                            <div id="mac-arch-options" style="display: none;">
+                                <label><input type="radio" name="mac-arch" value="Mac_Arm" checked> Mac ARM (M1/M2/M3)</label>
+                                <label style="margin-left: 10px;"><input type="radio" name="mac-arch" value="Mac"> Mac Intel</label>
+                            </div>
+                            <div id="linux-arch-options" style="display: none;">
+                                <label><input type="radio" name="linux-arch" value="Linux_x64" checked> Linux x64</label>
+                                <label style="margin-left: 10px;"><input type="radio" name="linux-arch" value="Linux"> Linux (32-bit/other)</label>
+                            </div>
+                            <div id="windows-arch-options" style="display: none;">
+                                <label><input type="radio" name="windows-arch" value="Win_x64" checked> Windows x64</label>
+                                <label style="margin-left: 10px;"><input type="radio" name="windows-arch" value="Win"> Windows (32-bit)</label>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>© 2025 chrome 历史版本搜索与下载</p>
+    </footer>
+    
+    <script src="script.js"></script>
+</body>
+</html>
