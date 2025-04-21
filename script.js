@@ -160,8 +160,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (paginationControls) paginationControls.style.display = 'none'; // 隐藏分页
         resultsBody.innerHTML = ''; // 清空旧结果
         
-        // 使用较大的num值以获取足够的数据进行客户端过滤
-        const apiUrl = `https://chromiumdash.appspot.com/fetch_releases?channel=${channel}&platform=${platform}&num=100&offset=0`;
+        // 从版本过滤条件中提取milestone参数
+        let milestone = '';
+        if (versionFilter) {
+            // 如果输入的是类似121.1或121这样的格式，提取milestone
+            const milestoneMatch = versionFilter.match(/^(\d+)/);
+            if (milestoneMatch && milestoneMatch[1]) {
+                milestone = milestoneMatch[1];
+            }
+        }
+        
+        // 构建API URL，如果有milestone则添加到参数中
+        let apiUrl = `https://chromiumdash.appspot.com/fetch_releases?channel=${channel}&platform=${platform}&num=100&offset=0`;
+        if (milestone) {
+            apiUrl += `&milestone=${milestone}`;
+        }
         
         fetch(apiUrl)
             .then(response => response.json())
