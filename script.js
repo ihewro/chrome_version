@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const detailModal = document.getElementById('detail-modal');
     const detailContent = document.getElementById('detail-content');
     const closeModal = document.querySelector('.close-modal');
+    // 语言切换按钮
+    const langZhBtn = document.getElementById('lang-zh');
+    const langEnBtn = document.getElementById('lang-en');
+    const pageTitle = document.getElementById('page-title');
 
     // 分页配置
     const itemsPerPage = 10;
@@ -25,13 +29,152 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPages = 1;
     let allResults = [];
     
+    // 语言配置
+    let currentLang = 'zh'; // 默认中文
+    
+    // 多语言文本
+    const translations = {
+        zh: {
+            pageTitle: 'Chromium 历史版本搜索与下载',
+            version: '版本:',
+            versionPlaceholder: '输入版本号，如 135.0.12',
+            category: '类别:',
+            platform: '平台:',
+            search: '搜索',
+            searchResults: '搜索结果',
+            totalCount: '总计: {0} 个结果',
+            versionColumn: '版本',
+            versionTimeColumn: '版本时间',
+            downloadColumn: '下载地址',
+            operationColumn: '操作',
+            checkDownload: '检查下载',
+            loading: '加载中...',
+            noResults: '没有找到匹配的结果',
+            fetchFailed: '获取数据失败，请稍后再试',
+            prevPage: '上一页',
+            nextPage: '下一页',
+            pageInfo: '第 {0} 页，共 {1} 页',
+            versionDetails: '版本详细信息',
+            checkComplete: '检查完成',
+            modalDownload: '下载 ({0})',
+            downloadSuccess: '已找到可用下载链接 (位置: {0}, 平台: {1})',
+            checkSummary: '检查结果摘要: 在后续尝试中找到可用链接',
+            noLinkAfterRetry: '在额外尝试后仍未找到可用链接'
+        },
+        en: {
+            pageTitle: 'Chromium Version History Search & Download',
+            version: 'Version:',
+            versionPlaceholder: 'Enter version number, e.g. 135.0.12',
+            category: 'Channel:',
+            platform: 'Platform:',
+            search: 'Search',
+            searchResults: 'Search Results',
+            totalCount: 'Total: {0} results',
+            versionColumn: 'Version',
+            versionTimeColumn: 'Release Date',
+            downloadColumn: 'Download',
+            operationColumn: 'Actions',
+            checkDownload: 'Check Download',
+            loading: 'Loading...',
+            noResults: 'No matching results found',
+            fetchFailed: 'Failed to fetch data, please try again later',
+            prevPage: 'Previous',
+            nextPage: 'Next',
+            pageInfo: 'Page {0} of {1}',
+            versionDetails: 'Version Details',
+            checkComplete: 'Check Complete',
+            modalDownload: 'Download ({0})',
+            downloadSuccess: 'Available download link found (Position: {0}, Platform: {1})',
+            checkSummary: 'Check Summary: Found available link in subsequent attempts',
+            noLinkAfterRetry: 'No available link found after additional attempts'
+        }
+    };
+    
     // 初始加载
     loadDefaultResults();
+    updateUILanguage();
     
     // 事件监听器
     searchBtn.addEventListener('click', performSearch);
     prevPageBtn.addEventListener('click', goToPrevPage);
     nextPageBtn.addEventListener('click', goToNextPage);
+    
+    // 语言切换事件
+    langZhBtn.addEventListener('click', function() {
+        if (currentLang !== 'zh') {
+            currentLang = 'zh';
+            updateLanguageButtons();
+            updateUILanguage();
+        }
+    });
+    
+    langEnBtn.addEventListener('click', function() {
+        if (currentLang !== 'en') {
+            currentLang = 'en';
+            updateLanguageButtons();
+            updateUILanguage();
+        }
+    });
+    
+    // 更新语言按钮状态
+    function updateLanguageButtons() {
+        langZhBtn.classList.toggle('active', currentLang === 'zh');
+        langEnBtn.classList.toggle('active', currentLang === 'en');
+    }
+    
+    // 更新UI语言
+    function updateUILanguage() {
+        const t = translations[currentLang];
+        
+        // 更新页面标题
+        pageTitle.textContent = t.pageTitle;
+        document.title = t.pageTitle;
+        
+        // 更新搜索区域
+        document.querySelector('label[for="version"]').textContent = t.version;
+        versionInput.placeholder = t.versionPlaceholder;
+        document.querySelector('label[for="channel"]').textContent = t.category;
+        document.querySelector('label[for="platform"]').textContent = t.platform;
+        searchBtn.textContent = t.search;
+        
+        // 更新结果区域
+        document.querySelector('.results-header h2').textContent = t.searchResults;
+        
+        // 更新表格头部
+        const tableHeaders = document.querySelectorAll('.ant-table-thead th');
+        if (tableHeaders.length >= 4) {
+            tableHeaders[0].textContent = t.versionColumn;
+            tableHeaders[1].textContent = t.versionTimeColumn;
+            tableHeaders[2].textContent = t.downloadColumn;
+            tableHeaders[3].textContent = t.operationColumn;
+        }
+        
+        // 更新分页按钮
+        prevPageBtn.textContent = t.prevPage;
+        nextPageBtn.textContent = t.nextPage;
+        
+        // 更新加载文本
+        document.querySelector('.ant-spin-text').textContent = t.loading;
+        
+        // 更新总计文本
+        updateTotalCountText();
+        
+        // 更新分页信息
+        updatePaginationUI();
+        
+        // 更新模态框内容
+        updateModalLanguage();
+        
+        // 重新渲染结果表格，确保"检查下载"按钮文本更新
+        displayResults();
+    }
+    
+    // 格式化文本，替换占位符
+    function formatText(text, ...args) {
+        return text.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] !== 'undefined' ? args[number] : match;
+        });
+    }
     
     // 事件委托：处理动态生成的 "下载" 按钮点击
     document.addEventListener('click', function(event) {
@@ -104,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
                  // 隐藏加载动画（如果它还在）
                  if (loadingAnimation) loadingAnimation.style.display = 'none';
                  const statusElement = containerElement.querySelector('#check-status');
-                 if (statusElement) statusElement.textContent = `检查完成`;
+                 if (statusElement) statusElement.textContent = translations[currentLang].checkComplete;
     
                 // 获取列表元素，准备追加成功信息
                 const resultsList = containerElement.querySelector('#check-results-list');
@@ -119,9 +262,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // 添加成功信息和下载按钮（追加到容器末尾，在列表之后）
                 const successFragment = document.createRange().createContextualFragment(`
-                    <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=${selectedPlatform}/${moreResult.position}/" target="_blank" class="modal-download-link download-btn ant-btn ant-btn-success">下载 (${selectedPlatform})</a>
-                    <div class="download-info success">已找到可用下载链接 (位置: ${moreResult.position}, 平台: ${selectedPlatform})</div>
-                    <div class="check-summary">检查结果摘要: 在后续尝试中找到可用链接</div>
+                    <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=${selectedPlatform}/${moreResult.position}/" target="_blank" class="modal-download-link download-btn ant-btn ant-btn-success">${formatText(translations[currentLang].modalDownload, selectedPlatform)}</a>
+                    <div class="download-info success">${formatText(translations[currentLang].downloadSuccess, moreResult.position, selectedPlatform)}</div>
+                    <div class="check-summary">${translations[currentLang].checkSummary}</div>
                 `);
                 containerElement.appendChild(successFragment); // 追加到容器末尾
             } else {
@@ -129,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
                  // 这里不需要额外操作，除非想覆盖 findAvailableDownload 的失败处理逻辑
                  if (loadingAnimation) loadingAnimation.style.display = 'none'; // 确保隐藏加载
                  const statusElement = containerElement.querySelector('#check-status');
-                 if (statusElement) statusElement.textContent = `在额外尝试后仍未找到可用链接`;
+                 if (statusElement) statusElement.textContent = translations[currentLang].noLinkAfterRetry;
             }
         }
     });
@@ -207,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resultsBody.style.display = ''; // 恢复表格显示
                 if (paginationControls) paginationControls.style.display = 'flex'; // 恢复分页显示
                 console.error('获取数据失败:', error);
-                resultsBody.innerHTML = `<tr><td colspan="4">获取数据失败，请稍后再试</td></tr>`;
+                resultsBody.innerHTML = `<tr><td colspan="4">${translations[currentLang].fetchFailed}</td></tr>`;
             });
     }
     
@@ -222,13 +365,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 如果没有结果
         if (allResults.length === 0) {
-            resultsBody.innerHTML = `<tr><td colspan="3">没有找到匹配的结果</td></tr>`;
-            totalCountElem.textContent = `总计: 0 个结果`;
+            resultsBody.innerHTML = `<tr><td colspan="3">${translations[currentLang].noResults}</td></tr>`;
+            updateTotalCountText();
             return;
         }
         
         // 更新总计数
-        totalCountElem.textContent = `总计: ${allResults.length} 个结果`;
+        updateTotalCountText();
         
         // 添加当前页的结果
         for (let i = startIndex; i < endIndex; i++) {
@@ -255,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${item.version}</td>
                 <td>${formattedDate}</td>
                 <td>
-                    <button class="download-btn ant-btn ant-btn-success" data-index="${i}" data-position="${item.chromium_main_branch_position}" data-platform="${item.platform}">检查下载</button>
+                    <button class="download-btn ant-btn ant-btn-success" data-index="${i}" data-position="${item.chromium_main_branch_position}" data-platform="${item.platform}">${translations[currentLang].checkDownload}</button>
                 </td>
                 <td>
                     <button class="detail-btn ant-btn ant-btn-default" data-index="${i}">+</button>
@@ -310,6 +453,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // 更新按钮状态
         prevPageBtn.disabled = currentPage <= 1;
         nextPageBtn.disabled = currentPage >= totalPages;
+        
+        // 更新分页信息文本
+        const pageInfoElem = document.getElementById('page-info');
+        if (pageInfoElem) {
+            pageInfoElem.innerHTML = formatText(translations[currentLang].pageInfo, 
+                `<span id="current-page">${currentPage}</span>`, 
+                `<span id="total-pages">${totalPages}</span>`);
+        }
+    }
+    
+    // 更新总计数文本
+    function updateTotalCountText() {
+        totalCountElem.textContent = formatText(translations[currentLang].totalCount, allResults.length);
     }
 
     // 上一页
@@ -384,10 +540,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         for (let i = 0; i < maxAttempts; i++) {
-            if (statusElement) statusElement.textContent = `正在检查 ${platformArch} 位置: ${currentPosition}... (${i + 1}/${maxAttempts})`;
+            if (statusElement) statusElement.textContent = currentLang === 'zh' ? 
+                `正在检查 ${platformArch} 位置: ${currentPosition}... (${i + 1}/${maxAttempts})` : 
+                `Checking ${platformArch} position: ${currentPosition}... (${i + 1}/${maxAttempts})`;
             if (resultsList) {
                 const li = document.createElement('li');
-                li.textContent = `尝试位置: ${currentPosition} (${platformArch})...`;
+                li.textContent = currentLang === 'zh' ? 
+                    `尝试位置: ${currentPosition} (${platformArch})...` : 
+                    `Trying position: ${currentPosition} (${platformArch})...`;
                 resultsList.appendChild(li);
             }
 
@@ -396,7 +556,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (resultsList) {
                 const lastLi = resultsList.lastElementChild;
                 if (lastLi) {
-                    lastLi.textContent += result.available ? ' ✔️ 可用' : ' ❌ 不可用';
+                    lastLi.textContent += result.available ? 
+                        (currentLang === 'zh' ? ' ✔️ 可用' : ' ✔️ Available') : 
+                        (currentLang === 'zh' ? ' ❌ 不可用' : ' ❌ Not available');
                     lastLi.classList.add(result.available ? 'success' : 'error');
                 }
             }
@@ -416,12 +578,21 @@ document.addEventListener('DOMContentLoaded', function() {
             currentPosition++;
             // 如果位置小于0，停止尝试
             if (currentPosition < 0) {
-                 if (statusElement) statusElement.textContent = '检查完成 (已尝试所有有效位置)';
+                 if (statusElement) statusElement.textContent = currentLang === 'zh' ? 
+                     '检查完成 (已尝试所有有效位置)' : 
+                     'Check complete (tried all valid positions)';
                  if (loadingAnimation) loadingAnimation.style.display = 'none';
                  // 添加最终未找到信息
+                 const errorMsg = currentLang === 'zh' ? 
+                     `在 ${maxAttempts} 次尝试后仍未找到 ${platformArch} 的可用下载链接 (起始位置 ${startPosition})` : 
+                     `No available download link found for ${platformArch} after ${maxAttempts} attempts (starting position ${startPosition})`;
+                 const summaryMsg = currentLang === 'zh' ? 
+                     '检查结果摘要: 未找到可用链接' : 
+                     'Check summary: No available link found';
+                     
                  const finalErrorFragment = document.createRange().createContextualFragment(`
-                    <div class="download-info error">在 ${maxAttempts} 次尝试后仍未找到 ${platformArch} 的可用下载链接 (起始位置 ${startPosition})</div>
-                    <div class="check-summary">检查结果摘要: 未找到可用链接</div>
+                    <div class="download-info error">${errorMsg}</div>
+                    <div class="check-summary">${summaryMsg}</div>
                  `);
                  containerElement.appendChild(finalErrorFragment);
                  return { available: false, position: null, platform: platformArch };
@@ -433,10 +604,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loadingAnimation) loadingAnimation.style.display = 'none';
 
         const lastAttemptedPositionInLoop = currentPosition - 1; // 记录循环中最后尝试的位置
+        const errorMsg = currentLang === 'zh' ? 
+            `在 ${maxAttempts} 次尝试后未找到 ${platformArch} 的可用下载链接 (起始位置 ${startPosition})` : 
+            `No available download link found for ${platformArch} after ${maxAttempts} attempts (starting position ${startPosition})`;
+        const btnText = currentLang === 'zh' ? '继续尝试更多 (+10)' : 'Try more (+10)';
+        const summaryMsg = currentLang === 'zh' ? '检查结果摘要: 未找到可用链接' : 'Check summary: No available link found';
+        
         const fragment = document.createRange().createContextualFragment(`
-            <div class="download-info error">在 ${maxAttempts} 次尝试后未找到 ${platformArch} 的可用下载链接 (起始位置 ${startPosition})</div>
-            <button id="try-more-btn" class="ant-btn ant-btn-default" style="margin-top:10px;" data-platform="${platformArch}" data-start-position="${startPosition}" data-last-position="${lastAttemptedPositionInLoop}">继续尝试更多 (+10)</button>
-            <div class="check-summary">检查结果摘要: 未找到可用链接</div>
+            <div class="download-info error">${errorMsg}</div>
+            <button id="try-more-btn" class="ant-btn ant-btn-default" style="margin-top:10px;" data-platform="${platformArch}" data-start-position="${startPosition}" data-last-position="${lastAttemptedPositionInLoop}">${btnText}</button>
+            <div class="check-summary">${summaryMsg}</div>
         `);
         containerElement.appendChild(fragment);
 
@@ -449,22 +626,25 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!item) return;
 
         // 准备模态框内容，但不立即开始检查
+        const t = translations[currentLang];
+        const locale = currentLang === 'zh' ? 'zh-CN' : 'en-US';
+        
         detailContent.innerHTML = `
-            <h4>版本: ${item.version} (${basePlatform})</h4>
+            <h4>${currentLang === 'zh' ? '版本' : 'Version'}: ${item.version} (${basePlatform})</h4>
             <p>Channel: ${item.channel}</p>
             <p>Milestone: ${item.milestone}</p>
             <p>Position: ${item.chromium_main_branch_position}</p>
-            <p>Time: ${new Date(item.time).toLocaleString('zh-CN')}</p>
+            <p>${currentLang === 'zh' ? '时间' : 'Time'}: ${new Date(item.time).toLocaleString(locale)}</p>
             <div id="download-check-results">
-                <p id="check-status">请选择架构并点击检查按钮</p>
-                <ul id="check-results-list">选择正确的平台架构以便获取链接</ul>
+                <p id="check-status">${currentLang === 'zh' ? '请选择架构并点击检查按钮' : 'Please select architecture and click check button'}</p>
+                <ul id="check-results-list">${currentLang === 'zh' ? '选择正确的平台架构以便获取链接' : 'Select the correct platform architecture to get links'}</ul>
                 <div id="loading-animation" class="loading-spinner" style="display: none; justify-content: center; align-items: center; margin-top: 10px;">
                     <div class="ant-spin ant-spin-spinning">
                         <span class="ant-spin-dot ant-spin-dot-spin">
                             <i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i>
                         </span>
                     </div>
-                    <span style="margin-left: 8px;">检查中...</span>
+                    <span style="margin-left: 8px;">${t.loading}</span>
                 </div>
                 <!-- 下载链接/按钮将在此处动态添加 -->
             </div>
@@ -473,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 添加架构选择器（从 index.html 移入或复制结构）
         const archSelectorHtml = `
             <div id="platform-arch-selector" style="display: none; margin-top: 15px;">
-                <strong>选择架构:</strong>
+                <strong>${currentLang === 'zh' ? '选择架构:' : 'Select Architecture:'}</strong>
                 <div id="mac-arch-options" style="display: none;">
                     <label><input type="radio" name="Mac" value="Mac_Arm" checked> Mac ARM</label>
                     <label style="margin-left: 10px;"><input type="radio" name="Mac" value="Mac"> Mac Intel</label>
@@ -486,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <label><input type="radio" name="Win" value="Win_x64" checked> Windows x64</label>
                     <label style="margin-left: 10px;"><input type="radio" name="Win" value="Win"> Windows</label>
                 </div>
-                <button id="start-check-btn" class="ant-btn ant-btn-primary" style="margin-top: 10px;">开始检查</button>
+                <button id="start-check-btn" class="ant-btn ant-btn-primary" style="margin-top: 10px;">${currentLang === 'zh' ? '开始检查' : 'Start Check'}</button>
             </div>
         `;
         detailContent.insertAdjacentHTML('beforeend', archSelectorHtml);
@@ -515,7 +695,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 禁用按钮，防止重复点击
             startCheckBtn.disabled = true;
-            startCheckBtn.textContent = '检查中...';
+            startCheckBtn.textContent = currentLang === 'zh' ? '检查中...' : 'Checking...';
 
             // 开始检查
             const result = await findAvailableDownload(selectedArch, position, checkResultsContainer, 10);
@@ -523,17 +703,17 @@ document.addEventListener('DOMContentLoaded', function() {
             // 根据检查结果更新UI
             if (result.available) {
                 const successFragment = document.createRange().createContextualFragment(`
-                    <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=${result.platform}/${result.position}/" target="_blank" class="modal-download-link download-btn ant-btn ant-btn-success">下载 (${result.platform})</a>
-                    <div class="download-info success">已找到可用下载链接 (位置: ${result.position}, 平台: ${result.platform})</div>
-                    <div class="check-summary">检查结果摘要: 找到可用链接</div>
+                    <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=${result.platform}/${result.position}/" target="_blank" class="modal-download-link download-btn ant-btn ant-btn-success">${formatText(translations[currentLang].modalDownload, result.platform)}</a>
+                    <div class="download-info success">${formatText(translations[currentLang].downloadSuccess, result.position, result.platform)}</div>
+                    <div class="check-summary">${translations[currentLang].checkSummary}</div>
                 `);
                 checkResultsContainer.appendChild(successFragment);
                 const statusElement = checkResultsContainer.querySelector('#check-status');
-                if (statusElement) statusElement.textContent = '检查完成';
+                if (statusElement) statusElement.textContent = translations[currentLang].checkComplete;
             } else {
                 // findAvailableDownload 内部会处理未找到的情况（包括添加 try-more-btn）
                 const statusElement = checkResultsContainer.querySelector('#check-status');
-                 if (statusElement) statusElement.textContent = '检查完成'; // 即使失败也标记完成
+                 if (statusElement) statusElement.textContent = translations[currentLang].checkComplete; // 即使失败也标记完成
             }
             // 检查完成后可以移除“开始检查”按钮或保持禁用状态
             startCheckBtn.remove(); // 或者 startCheckBtn.textContent = '检查完成';
@@ -554,7 +734,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 格式化时间
         const date = new Date(item.time);
-        const formattedDate = date.toLocaleString('zh-CN', {
+        const formattedDate = date.toLocaleString(currentLang === 'zh' ? 'zh-CN' : 'en-US', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
@@ -563,12 +743,18 @@ document.addEventListener('DOMContentLoaded', function() {
             second: '2-digit'
         });
 
+        // 根据当前语言设置标签文本
+        const versionLabel = currentLang === 'zh' ? '版本:' : 'Version:';
+        const timeLabel = currentLang === 'zh' ? '时间:' : 'Time:';
+        const platformLabel = currentLang === 'zh' ? '平台:' : 'Platform:';
+        const positionLabel = currentLang === 'zh' ? '位置 (Position):' : 'Position:';
+
         // 填充模态框内容
         detailContent.innerHTML = `
-            <p><strong>版本:</strong> ${item.version}</p>
-            <p><strong>时间:</strong> ${formattedDate}</p>
-            <p><strong>平台:</strong> ${item.platform}</p>
-            <p><strong>位置 (Position):</strong> ${item.chromium_main_branch_position}</p>
+            <p><strong>${versionLabel}</strong> ${item.version}</p>
+            <p><strong>${timeLabel}</strong> ${formattedDate}</p>
+            <p><strong>${platformLabel}</strong> ${item.platform}</p>
+            <p><strong>${positionLabel}</strong> ${item.chromium_main_branch_position}</p>
             <!-- 可以根据需要添加更多详细信息 -->
         `;
 
@@ -589,6 +775,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // 清空内容，防止旧的检查结果残留
         detailContent.innerHTML = '';
     });
+    
+    // 当语言改变时，如果模态框打开，更新其内容
+    function updateModalLanguage() {
+        if (detailModal.style.display !== 'none') {
+            // 更新模态框标题
+            const modalHeader = document.querySelector('.modal-header h3');
+            if (modalHeader) {
+                modalHeader.textContent = translations[currentLang].versionDetails;
+            }
+            
+            // 更新下载按钮文本
+            const downloadBtn = detailModal.querySelector('.modal-download-link');
+            if (downloadBtn) {
+                const platform = downloadBtn.textContent.match(/\((.+)\)/);
+                if (platform && platform[1]) {
+                    downloadBtn.textContent = formatText(translations[currentLang].modalDownload, platform[1]);
+                }
+            }
+        }
+    }
 
     // 点击模态框外部关闭
     window.addEventListener('click', function(event) {
