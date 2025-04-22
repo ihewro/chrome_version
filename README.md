@@ -8,6 +8,7 @@ chromium 虽然有 https://chromiumdash.appspot.com/ ，但是官网并没有提
 - https://chromium.en.uptodown.com/windows
 - https://www.gitclear.com/open_repos/chromium/chromium/ 不支持搜索
 - https://chromium.woolyss.com/download/ 只保留了最新的几个版本下载
+- https://github.com/ulixee/chrome-versions chrome 历史版本下载
 
 
 因此，使用chromiumdash.appspot.com 官方的api 结合googleapis，提供了本工具，支持搜索。
