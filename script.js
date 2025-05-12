@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
             startCheckBtn.textContent = currentLang === 'zh' ? '检查中...' : 'Checking...';
 
             // 开始检查
-            const result = await findAvailableDownload(selectedArch, position, checkResultsContainer, 10);
+            const result = await findAvailableDownload(selectedArch, position, checkResultsContainer, 100);
 
             // 根据检查结果更新UI
             if (result.available) {
